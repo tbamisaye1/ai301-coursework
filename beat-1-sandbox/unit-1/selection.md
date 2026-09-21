@@ -28,7 +28,7 @@ Both candidates are in the scoped repo (codepath/pathreview-ai301-fa26-s3) — n
 
 Ranked (both accepted):
 
-1. #68 — Keyword search ZeroDivisionError on empty index (rag/retriever/keyword_search.py). Fits best: it's RAG/retrieval work, directly on your stated goal of getting better at agentic AI systems. A student commented "I'd like to take this on," but no assignee and no open PR exist, so per the Path Review house rule it doesn't block you.
+1. #68 — Keyword search ZeroDivisionError on empty index (rag/retriever/keyword_search.py). Fits best: it's RAG/retrieval work, directly on your stated goal of getting better at agentic AI systems. A student commented "I'd like to take this on," but no assignee and no open PR exist, so per the Path Review house rule it doesn't block you. It's a single issue so it fits my week timeleine
 2. #72 — verify_password raises instead of returning False on malformed hash (core/security.py). Solid backend Python bug fix, no claims at all, but it's general security/backend rather than your ML/agentic-AI growth area.
 
 ```json
