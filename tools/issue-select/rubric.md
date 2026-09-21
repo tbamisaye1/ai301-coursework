@@ -1,0 +1,17 @@
+# Rubric: is this a good first issue?
+
+All dates are measured against the bundle's capture date in eval mode, and against today in live mode.
+
+## Checks
+
+| Check | Evidence | Pass condition | Weight |
+|---|---|---|---|
+| maintainer-alive | Two lists under Repo facts: the "maintainer first-response sample" (5 recently updated issues, each with the days until the first comment from an OWNER, MEMBER or COLLABORATOR), and the "last 5 default-branch commits" (each with its date and author name). | Passes if EITHER (a) at least one of the sampled issues got its first OWNER, MEMBER or COLLABORATOR comment within 30 days, OR (b) at least one of the last 5 default-branch commits is dated within 30 days of the capture date and was authored by a human (an author name that does not end in "[bot]"). "No maintainer comment in thread" counts as no response for that issue. Fails only if neither (a) nor (b) holds. | required |
+| repo-alive | Three lines under Repo facts: "archived:" on the repo line, "latest release", and "last push to any branch". | The repo is not archived, AND either (a) the latest release is dated within 183 days (6 months) of the capture date, or (b) the repo has no releases at all and its last push to any branch is within 30 days of the capture date. A repo whose latest release is older than 183 days fails, even if it has recent pushes. | required |
+| bounded-scope | The issue body and full comment thread (including each commenter's author_association), the "linked PRs" line under Repo facts, any PRs mentioned in the comments, and the issue's open date. | Fails if ANY of these is true: (1) the issue itself says it is an umbrella, tracking or meta issue, or explicitly asks for the work to be split into separate PRs or sub-issues (several related edits that together deliver one stated outcome count as one bounded piece of work, not an umbrella); (2) the thread shows the design is still being debated and no OWNER, MEMBER or COLLABORATOR has settled it; (3) an OWNER, MEMBER or COLLABORATOR says the fix requires changes to core internals; (4) the issue is a usage or support question rather than a requested change; (5) the issue was opened more than 365 days before the capture date AND has at least one closed, unmerged PR (an abandoned attempt). Otherwise passes. A short body, a checklist-style body, or a bug report without reproduction steps does NOT fail this check on its own. | required |
+| not-claimed | "this issue: assignees:" and "linked PRs:" under Repo facts, plus any PRs mentioned in the comment thread. | No one is assigned, AND there is no open PR for this issue, whether formally linked or only mentioned in the comments. Closed, unmerged PRs are abandoned attempts, not claims. "I'll take this" comments with no assignee and no open PR do not count as a claim. | required |
+| ai-policy | The "contribution policy" line under Repo facts (CONTRIBUTING.md, AI policy files, PR templates). | The policy does not ban AI-generated or AI-assisted contributions. Conditions such as disclosing AI use, reviewing and understanding AI output, or testing changes are terms to follow and pass. A repo that states no policy passes. | required |
+
+## Verdict rule
+
+Accept only if every check passes. Every check is required, so a single fail rejects the issue. There are no preferred checks. Unclear counts as fail: if the evidence a check needs is genuinely absent, the issue is rejected, because a first issue I cannot verify is not one I should take.
