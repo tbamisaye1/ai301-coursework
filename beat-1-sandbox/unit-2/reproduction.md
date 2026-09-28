@@ -146,28 +146,35 @@ fields.
 
 **Run history**
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+1. Run 1: full run of all 20 scored packages with my first rubric: **18/20** scored items. This is the run committed in `eval-run.txt`:
+
+   > agreement: 18/20 scored items  (bar: 18/20: PASS)
+
+   > categories: clear-accept 6/8  disclosure 1/1  no-evidence 4/4  unfollowable-comms 3/3  wrong-target 4/4
+
+The first full run cleared the bar with every category matched, including the single disclosure package, so I kept the rubric as it was instead of spending more credit on revisions. The two disagreements (pkg-03 and pkg-05) were both good reports that my rubric rejected; I explain pkg-05 below.
 
 **Package analysis**
 
-[Pick one scored package (`pkg-01` through `pkg-20` — the four `calib-` packages are never
-scored). Name it by id, say what your rubric decided and what the gold label said, and
-explain why your rubric read it that way.]
+`pkg-05` (conda/conda#16543). My rubric's decision: **reject**. Gold label: **accept**.
+
+The check that rejected it was `steps-rerunnable`. The report says it "wrote a minimal `env.yml` containing a valid `dependencies:` list plus a `category:` section" but never pastes the file itself. My pass condition says every input must be "shown, public, or taken verbatim from the issue", so my grader treated the file as a missing input.
+
+The gold label accepts it because the description is enough to rebuild the file: any valid dependencies plus one unrecognized `category:` section. The output shown proves the bug: the `EnvironmentSectionNotValid` warning is printed to stdout above the JSON, and piping it into `python3 -m json.tool` fails with "Expecting value: line 1 column 1 (char 1)". My rule treats "described precisely" the same as "not shown", which is stricter than this package needed.
 
 **Check rationale**
 
-[Quote one check from the `rubric.md` you uploaded to `tools/repro-check/`, exactly as it reads now.
-Then say why it reads that way — what you revised to get there, or what you rejected in
-favour of it.]
+`artifact-shown`, quoted as it currently reads in `tools/repro-check/rubric.md`:
+
+> The report shows at least one artifact from its own run that relates to on the behavior the issue describes. Fails if the report only asserts ("I verified", "reproducible", "+1, seeing this too"), or if its artifacts only show the program running normally and say nothing about the reported behavior.
+
+A reproduction is only as good as the output behind it. If someone says they can see the bug but shows nothing, like pkg-04's "+1 also seeing this!!", a maintainer has no way to check the claim. So this check asks for real output from the person's own run. Any output is not enough, though: pkg-14 shows zellij running normally (a version banner and a session list), which proves nothing about a blank pane, so the second clause catches artifacts that are real but say nothing about the bug.
+
+I deliberately kept this check narrow. It only asks whether there is real evidence at all. Whether that evidence is the right bug is a separate check, `same-behavior`, which catches packages like pkg-02, where the output is real but shows a graceful argument error instead of the crash the issue reports. Splitting the two means a failed grade tells me which problem the report has.
 
 **Trade-offs**
 
-[Every check gives something up. Any one of these is a complete answer: a package whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+`steps-rerunnable` is strict: it wants every input shown, not only described. That strictness is what rejects pkg-18, whose steps only work inside a private monorepo with an unshared config. The cost is pkg-05, a good report that describes its `env.yml` instead of pasting it, which my rubric rejects against a gold accept. I accept that miss. Loosening the rule to "described precisely enough to rebuild" would ask the grader to judge how detailed a description is, and pkg-18 could pass that way too ("a large Go monorepo with a custom config" is also a description). If I did loosen it, I would re-run pkg-05 with pkg-18 and pkg-06 as canaries using `--only` before spending a confirming full run.
 
 ---
 
