@@ -15,8 +15,7 @@ label is not graded.
 
 **GitHub username**
 
-[Your GitHub username, exactly as it appears on your profile — no `@`, no profile URL. Your
-comments upstream are identified by this name.]
+tbamisaye1
 
 ---
 
@@ -24,9 +23,18 @@ comments upstream are identified by this name.]
 
 **Claim comment**
 
-[Link to the comment where you claimed the issue. Use the comment's own permalink, not the
-issue page on its own. **Then paste the text of that comment underneath the link** — the
-pasted text is what this field is graded on, so copy across what you actually posted.]
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/68#issuecomment-5872174052
+
+> Hi, I'd like to work on this as my first contribution to Path Review. I haven't run anything yet, so this is my plan rather than a result.
+>
+> Next, I will:
+>
+> 1. Set up the repository from its own documentation (`docs/SETUP.md` and the install line in the Makefile) in a fresh virtual environment.
+> 2. Call `KeywordSearcher().index([])` directly to see whether it raises `ZeroDivisionError`, and capture the full traceback to find where the division by zero happens.
+> 3. Run `pytest tests/unit/test_keyword_search.py -k test_empty_index` to check whether the `xfail` test (manifest H-01) fails for the reason this issue describes and not for some other reason.
+> 4. Compare `index()` with `search()`, which already returns an empty list when nothing has been indexed.
+>
+> I'll post my environment, the exact commands I ran, and the output I get, including if I can't reproduce it.
 
 **Reproduction comment**
 
