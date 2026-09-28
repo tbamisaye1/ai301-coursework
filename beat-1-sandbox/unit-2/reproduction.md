@@ -38,10 +38,106 @@ https://github.com/codepath/pathreview-ai301-fa26-s3/issues/68#issuecomment-5872
 
 **Reproduction comment**
 
-[Link to the comment where you posted your reproduction. It must record the environment
-(OS, relevant versions, code state), steps a stranger could follow, and what you observed.
-**Then paste the text of that comment underneath the link** — the pasted text is what this
-field is graded on, so copy across what you actually posted.]
+https://github.com/codepath/pathreview-ai301-fa26-s3/issues/68#issuecomment-5872690654
+
+> I reproduced this on `main` at commit `2f4e82f`.
+>
+> **Environment**
+>
+> - Python 3.11.8 (CPython), in a fresh virtual environment
+> - macOS 26.4.1 on a MacBook Air (arm64)
+> - rank-bm25 0.2.2 (the repository requires `rank-bm25>=0.2.2`), structlog 26.1.0, pytest 9.1.1
+> - Repository: my fork of `codepath/pathreview-ai301-fa26-s3`, cloned at commit `2f4e82f52efbcfcc57d65b3fa5348672163ca088` (the same commit as upstream `main`)
+>
+> **Setup**
+>
+> From an empty folder:
+>
+> ```bash
+> git clone https://github.com/codepath/pathreview-ai301-fa26-s3.git
+> cd pathreview-ai301-fa26-s3
+> python3 -m venv .venv
+> .venv/bin/pip install --upgrade pip
+> .venv/bin/pip install -e ".[dev]"
+> ```
+>
+> This is the install line from the repository's setup documentation. I did not start the database, Redis or the API, because this code path does not use them.
+>
+> **Run 1: the call from the issue**
+>
+> ```bash
+> .venv/bin/python -c "from rag.retriever.keyword_search import KeywordSearcher; KeywordSearcher().index([])"
+> ```
+>
+> ```
+> Traceback (most recent call last):
+>   File "<string>", line 1, in <module>
+>   File ".../rag/retriever/keyword_search.py", line 25, in index
+>     self.bm25 = BM25Okapi(tokenized_corpus)
+>                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>   File ".../.venv/lib/python3.11/site-packages/rank_bm25.py", line 83, in __init__
+>     super().__init__(corpus, tokenizer)
+>   File ".../.venv/lib/python3.11/site-packages/rank_bm25.py", line 27, in __init__
+>     nd = self._initialize(corpus)
+>          ^^^^^^^^^^^^^^^^^^^^^^^^
+>   File ".../.venv/lib/python3.11/site-packages/rank_bm25.py", line 52, in _initialize
+>     self.avgdl = num_doc / self.corpus_size
+>                  ~~~~~~~~^~~~~~~~~~~~~~~~~~
+> ZeroDivisionError: division by zero
+> ```
+>
+> **Run 2: control with one document**
+>
+> ```bash
+> .venv/bin/python -c "
+> from rag.retriever.keyword_search import KeywordSearcher
+> s = KeywordSearcher()
+> s.index([{'id': 1, 'text': 'python programming'}])
+> print(s.search('python', top_k=10))
+> "
+> ```
+>
+> ```
+> 2026-09-28 10:45:22 [info     ] keyword_index_built            chunk_count=1
+> 2026-09-28 10:45:22 [info     ] keyword_search_complete        query_len=1 results_count=1
+> [{'id': 1, 'text': 'python programming', 'bm25_score': -0.2746530721670274}]
+> ```
+>
+> With one document, `index()` builds the index and `search()` returns the result, so the failure only happens when the list of chunks is empty.
+>
+> **Run 3: the covering test, with the `xfail` marker ignored**
+>
+> The test is marked `xfail(strict=True)`, so pytest normally hides its error. `--runxfail` runs it as a normal test so the real failure is visible:
+>
+> ```bash
+> .venv/bin/pytest tests/unit/test_keyword_search.py -k test_empty_index --runxfail
+> ```
+>
+> ```
+> tests/unit/test_keyword_search.py F                                    [100%]
+>
+>     def test_empty_index(self, searcher):
+>         """Test searching on empty index."""
+> >       searcher.index([])
+>
+> tests/unit/test_keyword_search.py:140:
+> rag/retriever/keyword_search.py:25: in index
+>     self.bm25 = BM25Okapi(tokenized_corpus)
+> .venv/lib/python3.11/site-packages/rank_bm25.py:52: ZeroDivisionError
+>
+> self = <rank_bm25.BM25Okapi object at 0x1038330d0>, corpus = []
+> >       self.avgdl = num_doc / self.corpus_size
+> E       ZeroDivisionError: division by zero
+>
+> FAILED tests/unit/test_keyword_search.py::TestKeywordSearcher::test_empty_index - ZeroDivisionError: division by zero
+> ====================== 1 failed, 16 deselected in 1.52s ======================
+> ```
+>
+> **Expected:** `index([])` finishes without an exception, and a later `search()` returns `[]`, the same way `search()` already returns `[]` when `index()` was never called.
+>
+> **Actual:** `index([])` raises `ZeroDivisionError: division by zero`. The traceback shows the division happens inside rank-bm25 (`rank_bm25.py`, line 52, `num_doc / self.corpus_size`), where `corpus_size` is 0 because the corpus is empty. `KeywordSearcher.index()` passes the empty corpus straight to `BM25Okapi` at `keyword_search.py` line 25, with no check for the empty case like the one `search()` has. The covering test `test_empty_index` fails at the same line (`test_keyword_search.py:140`) with the same error, so the `xfail` is failing for the reason this issue describes.
+>
+> I did not change any source code or test markers to get these results. Next I'll look at how `index()` should handle an empty list so that it matches `search()`, and I'll share what I find here before opening a pull request.
 
 ## Eval iterations
 
