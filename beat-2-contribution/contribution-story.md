@@ -8,9 +8,8 @@ format criteria grade exactly that. Your course repo link is the whole submissio
 files and no evidence uploads are part of Assignment 5.
 
 **Contribution Number:** [1]
-**Student:** [Student name]
-**GitHub Username:** [your GitHub username, exactly as it appears on your profile - no @, no
-profile URL. Your comments upstream are identified by this name.]
+**Student:** Tobi Bamisaye
+**GitHub Username:** tbamisaye1
 **Issue:** [GitHub issue link]
 **Pull Request:** [GitHub PR link, once opened]
 
@@ -55,10 +54,9 @@ happened; these entries are the toolkit's own timeline.
 All four entries are graded. Keep every heading below, and fill each
 one in the week it belongs to.
 
-**Unit 5: [one line on the tool work]**
+**Unit 5: built the issue-scout and fixed a strategy that ranked already-claimed issues first**
 
-[2-4 sentences: what you built (the scout, your strategy), what broke
-or fell short, what changed because of it.]
+I turned my Unit 1 rubric into a scout: four `gh search issues` queries traced to my fit profile (agent and LLM tooling in Python, established projects), plus ranking filters that put a named list of established AI organisations first. My first full scan ranked five issues from microsoft, crewAI, llama_index and huggingface, and my rubric rejected all five on not-claimed, because each already had open pull requests. The free ranking stage cannot see claims, and two filters were also loose: one matched "ui" as a substring (so it would drop "build" labels), and one let docs-only issues through when they also had a "bug" label. I added `-linked:pr` to every query, which removes all five from the search results and cuts the main pool from 153 to 96, and I fixed both filters.
 
 **Unit 6: [one line on the tool work]**
 
